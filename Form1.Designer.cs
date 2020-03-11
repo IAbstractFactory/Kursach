@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Media;
@@ -11,10 +12,15 @@ namespace Курсач
 {
     partial class Form1
     {
+        
+        
+        TimeSpan time;
         bool GameEnd = false;
         bool GameStart = false;
         bool FirstClick = true;
         private System.Drawing.Point point;
+        SoundPlayer soundPlayer = new SoundPlayer(@"C:\Users\Никита\source\repos\Курсач v2.0\Курсач\Курсач\bin\Debug\Sounds\MOON - Dust [Hotline Miami 2 OST] (online-audio-converter.com).wav");
+
         /// <summary>
         /// Обязательная переменная конструктора.
         /// </summary>
@@ -42,9 +48,8 @@ namespace Курсач
         private void InitializeComponent()
         {
             // Музыка
-            //SoundPlayer soundPlayer = new SoundPlayer(@"C:\Users\Home\source\repos\Курсач\Курсач\bin\Debug\Sounds\MOON - Dust [Hotline Miami 2 OST] (online-audio-converter.com).wav");
-            //Thread thread = new Thread(soundPlayer.PlayLooping);
-            //thread.Start();
+            Thread thread = new Thread(soundPlayer.PlayLooping);
+            thread.Start();
             //
 
             for (int i = 0; i < buttons.Length; i++)
@@ -73,7 +78,7 @@ namespace Курсач
                         this.buttons[k].FlatAppearance.BorderSize = 0;
                         this.buttons[k].FlatStyle = System.Windows.Forms.FlatStyle.Flat;
 
-                        this.buttons[k].BackgroundImage = new Bitmap(@"C:\Users\Никита\source\repos\Курсач v2.0\Курсач\Курсач\bin\Debug\Pictures\" + pictureFile.ToString() + @"\"+k.ToString()+".jpg");
+                        this.buttons[k].BackgroundImage = new Bitmap(@"C:\Users\Никита\source\repos\Курсач v2.0\Курсач\Курсач\bin\Debug\Pictures\" + pictureFile.ToString() + @"\" + k.ToString() + ".jpg");
                         this.buttons[k].BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
                         this.buttons[k].Click += Button_Click;
                         this.buttons[k].Click += TimerStart;
@@ -103,9 +108,9 @@ namespace Курсач
             this.labelTimer.Show();
 
 
-            
+
             // Form1
-            
+
             this.BackColor = Color.FromArgb(226, 218, 241);
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -117,16 +122,28 @@ namespace Курсач
             this.Controls.Add(this.label);
             this.Controls.Add(this.labelTimer);
             this.ResumeLayout(false);
+            this.FormClosed += Form1_FormClosed;
 
             Mix();
         }
+
+
+        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            GameEnd = true;
+            soundPlayer.Stop();
+
+
+
+        }
+
         async private void Mix()
         {
 
             await Task.Run(() =>
             {
                 Thread.Sleep(1000);
-                for (int j = 0; j < 50; j++)
+                for (int j = 0; j < 50 && !GameStart; j++)
                 {
                     for (int i = 0; i < buttons.Length; i++)
                     {
@@ -168,7 +185,7 @@ namespace Курсач
                     for (int i = but.Location.X; i > point.X; i--)
                     {
                         but.Location = new Point(but.Location.X - 1, but.Location.Y);
-                       // Thread.Sleep(1);
+                        // Thread.Sleep(1);
                     }
 
                 point = p;
@@ -183,13 +200,13 @@ namespace Курсач
                     for (int i = but.Location.Y; i <= point.Y; i++)
                     {
                         but.Location = new Point(but.Location.X, but.Location.Y + 1);
-                       // Thread.Sleep(1);
+                        // Thread.Sleep(1);
                     }
                 if (but.Location.Y > point.Y)
                     for (int i = but.Location.Y; i > point.Y; i--)
                     {
                         but.Location = new Point(but.Location.X, but.Location.Y - 1);
-                       // Thread.Sleep(1);
+                        // Thread.Sleep(1);
                     }
 
                 point = p;
@@ -197,7 +214,10 @@ namespace Курсач
             if (Victory())
             {
                 GameEnd = true;
-                MessageBox.Show("Вы победили!");
+                Form3 form3 = new Form3(time);
+                form3.Show();
+
+
 
             }
         }
@@ -214,8 +234,8 @@ namespace Курсач
                 {
                     while (!GameEnd)
                     {
-                        var time = DateTime.Now - dateTime;
-                        labelTimer.Text = time.ToString().Remove(11).Remove(0, 3);
+                        time = DateTime.Now - dateTime;
+                        labelTimer.Text = time.ToString();//.Remove(11).Remove(0, 3);
                     }
                 });
 
